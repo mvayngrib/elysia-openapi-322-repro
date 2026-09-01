@@ -7,6 +7,23 @@ Same root cause as [#345](https://github.com/elysiajs/elysia-openapi/issues/345)
 [#339](https://github.com/elysiajs/elysia-openapi/issues/339) and
 [#298](https://github.com/elysiajs/elysia-openapi/issues/298).
 
+## This is already fixed in two open PRs
+
+**No new patch is needed — one of these just needs review.** Both have been sitting open:
+
+| PR | Opened | Approach |
+|---|---|---|
+| [**#290** — fix: add type-gen support for alphanumeric paths](https://github.com/elysiajs/elysia-openapi/pull/290) | 2025-10-18 (+58/-2, with tests) | Quotes *every* unquoted property key instead of narrowing the numeric match. Minimal and self-contained; explicitly targets [#298](https://github.com/elysiajs/elysia-openapi/issues/298). |
+| [**#329** — fix: fromTypes response parsing](https://github.com/elysiajs/elysia-openapi/pull/329) | 2026-02-23 (+895/-34) | Carries the identical `(?<=^\|[{;,\s])(\d+):` lookbehind, bundled with unrelated fixes (type-alias inlining, `import()` resolution). |
+
+[#290](https://github.com/elysiajs/elysia-openapi/pull/290) is the smaller review surface if the
+goal is just to unblock [#322](https://github.com/elysiajs/elysia-openapi/issues/322),
+[#345](https://github.com/elysiajs/elysia-openapi/issues/345),
+[#339](https://github.com/elysiajs/elysia-openapi/issues/339) and
+[#298](https://github.com/elysiajs/elysia-openapi/issues/298) — four issues, one line.
+
+This repo exists only to show the bug is still live on the current `next` release.
+
 ## Run
 
 ```sh
@@ -52,9 +69,12 @@ hits `continue`, and the whole object is dropped. Because each route is its own 
 of the routes generic, **every** route under `api.v1` disappears at once — which is why #322 looks
 like "type inference is completely unavailable" rather than one bad route.
 
-## Fix
+## The one-line change
 
-Anchor the match to a key boundary so it only fires on keys that are entirely numeric:
+For reference, this is what [#329](https://github.com/elysiajs/elysia-openapi/pull/329)
+carries; [#290](https://github.com/elysiajs/elysia-openapi/pull/290) achieves the same result by
+quoting every key. Anchor the match to a key boundary so it only fires on keys that are entirely
+numeric:
 
 ```diff
 -const numberKey = /(\d+):/g
@@ -82,9 +102,6 @@ Paths that are *entirely* numeric (`/api/2024/report`) still get quoted correctl
 - 2.0 does add real declared-type handling (`extractTypeContext`, `resolveTypeRefs`,
   `resolveExternalRefs`), but both branches of `declarationToReference` call
   `declarationToJSONSchema`, which applies the corrupting replace before any of it runs.
-- Existing PRs covering this: [#290](https://github.com/elysiajs/elysia-openapi/pull/290)
-  (quotes every property key) and [#329](https://github.com/elysiajs/elysia-openapi/pull/329)
-  (same lookbehind, bundled with unrelated fixes).
 - `@elysia/openapi@2.0.0-beta.1` cannot be tested directly: its `dist/gen/index.mjs` imports
   `"../node_modules/typebox/build/type/script/script.mjs"`, which is not in the published tarball,
   so `@elysia/openapi/gen` fails to import at all. Fixed in `beta.2`.
