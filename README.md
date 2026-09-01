@@ -106,4 +106,4 @@ Paths that are *entirely* numeric (`/api/2024/report`) still get quoted correctl
   `"../node_modules/typebox/build/type/script/script.mjs"`, which is not in the published tarball,
   so `@elysia/openapi/gen` fails to import at all. Fixed in `beta.2`.
 
-Verified with bun 1.4.0 and tsc 7.0.2 on macOS.
+Verified with bun 1.4.0 and tsc 5.9.3 on macOS (arm64).
