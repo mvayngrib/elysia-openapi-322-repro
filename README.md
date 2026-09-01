@@ -14,7 +14,7 @@ Same root cause as [#345](https://github.com/elysiajs/elysia-openapi/issues/345)
 | PR | Opened | Approach |
 |---|---|---|
 | [**#290** — fix: add type-gen support for alphanumeric paths](https://github.com/elysiajs/elysia-openapi/pull/290) | 2025-10-18 (+58/-2, with tests) | Quotes *every* unquoted property key instead of narrowing the numeric match. Minimal and self-contained; explicitly targets [#298](https://github.com/elysiajs/elysia-openapi/issues/298). |
-| [**#329** — fix: fromTypes response parsing](https://github.com/elysiajs/elysia-openapi/pull/329) | 2026-02-23 (+895/-34) | Carries the identical `(?<=^\|[{;,\s])(\d+):` lookbehind, bundled with unrelated fixes (type-alias inlining, `import()` resolution). |
+| [**#329** — fix: fromTypes response parsing](https://github.com/elysiajs/elysia-openapi/pull/329) | 2026-02-23 (+895/-34) | Carries the same lookbehind approach — `(?<=^\|[{;,\s])(\d+):`, which differs from the diff below only in leaving `}` out of the character class — bundled with unrelated fixes (type-alias inlining, `import()` resolution). |
 
 [#290](https://github.com/elysiajs/elysia-openapi/pull/290) is the smaller review surface if the
 goal is just to unblock [#322](https://github.com/elysiajs/elysia-openapi/issues/322),
@@ -71,10 +71,10 @@ like "type inference is completely unavailable" rather than one bad route.
 
 ## The one-line change
 
-For reference, this is what [#329](https://github.com/elysiajs/elysia-openapi/pull/329)
-carries; [#290](https://github.com/elysiajs/elysia-openapi/pull/290) achieves the same result by
-quoting every key. Anchor the match to a key boundary so it only fires on keys that are entirely
-numeric:
+For reference — this is [#329](https://github.com/elysiajs/elysia-openapi/pull/329)'s approach, up
+to the `}` noted above; [#290](https://github.com/elysiajs/elysia-openapi/pull/290) achieves the
+same result by quoting every key. Anchor the match to a key boundary so it only fires on keys that
+are entirely numeric:
 
 ```diff
 -const numberKey = /(\d+):/g
